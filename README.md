@@ -8,6 +8,6 @@ https://fmnijk.github.io/
 
 https://fmnijk.github.io/graph_paper/
 
-範例
+範例，預設背景是白的，把Alpha通道改成0就是透明了
 
-![alt text](https://fmnijk.github.io/graph_paper/sample.png)
+<img src="https://fmnijk.github.io/graph_paper/sample.png" width="400">
