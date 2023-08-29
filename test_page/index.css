@@ -1,0 +1,301 @@
+#language{
+transition:all 0.3s ease;
+float: right;
+	
+}
+#language ul{
+float: left;
+transition:all 0.3s ease;
+margin: 0;
+padding: 0;
+list-style: none;
+}
+#language ul li{
+padding:10px 10px;
+margin-left:2px;
+transition:all 0.3s ease;
+position: relative;
+
+}
+
+#language ul li:hover{transition:all 0.3s ease;
+background-color: #1f1f1f;
+border-radius:5px 5px 0px 0px;
+-moz-border-radius:5px 5px 0px 0px;
+-webkit-border-radius:5px 5px 0px 0px;
+}
+
+#language ul li ul
+{transition:all 0.3s ease;
+width: 100px;
+	background: #1f1f1f;
+	height: auto;
+	-webkit-box-shadow: 0px 9px 21px 0px rgba(50, 50, 50, 0.31);
+	-moz-box-shadow:    0px 9px 21px 0px rgba(50, 50, 50, 0.31);
+	box-shadow:         0px 9px 21px 0px rgba(50, 50, 50, 0.31);
+}
+#language li ul{
+transition:all 0.3s ease;
+	position: absolute;
+	right: 0;
+	top: 30px;
+	display: none;
+	float:left;
+	padding: 0px;
+}
+#language ul li a 
+{
+
+	float:left;
+	transition:all 0.3s ease;
+	font-size:13px;
+	padding: 0;
+	margin: 0;
+	text-align:center;
+	text-decoration: none;
+	color: #f1f1f1;
+}
+#language li ul li{
+padding: 0px;
+margin: 0px;
+width: 100px;}
+#language li ul li a{
+width: 80px;
+white-space: nowrap;
+	transition:all 0.3s ease;
+	text-align:left;
+	font-size:13px;
+
+	display: block;
+	border-bottom: 1px dotted #353535;
+margin: 0;
+	padding: 0 10px;
+}
+#language li ul li a:hover{
+width: 80px;
+transition:all 0.3s ease;
+	background: #787878;
+	color:black;
+	border-bottom: 1px dotted #787878;
+margin: 0;
+	padding: 0 10px;
+}
+* html #language ul li { float: left; height: 1%; }
+* html #language ul li a { height: 1%; }
+#language li:hover ul, 
+#language li.over ul { display: block; z-index: 9999;}
+
+.trf{
+background-image: url(../images/flags.png);
+height: 11px;
+width: 16px;
+background-repeat: no-repeat;
+overflow: hidden;
+display: inline-block;
+vertical-align: middle;
+}
+.langname{margin-left: 3px;}
+
+.trf-za{
+	background-position:-24px 0;
+}
+
+.trf-al{
+	background-position:-48px 0;
+}
+
+.trf-arabic{
+	background-position:-72px 0;
+}
+
+.trf-by{
+	background-position:-96px 0;
+}
+
+.trf-bg{
+	background-position:-120px 0;
+}
+
+.trf-catalonia{
+	background-position:-144px 0;
+}
+
+.trf-cn{
+	background-position:-168px 0;
+}
+
+.trf-tw{
+	background-position:-192px 0;
+}
+
+.trf-hr{
+	background-position:-216px 0;
+}
+
+.trf-cz{
+	background-position:-240px 0;
+}
+
+.trf-dk{
+	background-position:-264px 0;
+}
+
+.trf-dutch{
+	background-position:-288px 0;
+}
+
+.trf-ee{
+	background-position:-312px 0;
+}
+
+.trf-fi{
+	background-position:-336px 0;
+}
+
+.trf-french{
+	background-position:-360px 0;
+}
+
+.trf-galicia{
+	background-position:-384px 0;
+}
+
+.trf-german{
+	background-position:-408px 0;
+}
+
+.trf-gr{
+	background-position:-432px 0;
+}
+
+.trf-hebrew{
+	background-position:-456px 0;
+}
+
+.trf-in{
+	background-position:-480px 0;
+}
+
+.trf-hungary{
+	background-position:-504px 0;
+}
+
+.trf-indonesia{
+	background-position:-528px 0;
+}
+
+.trf-it{
+	background-position:-552px 0;
+}
+
+.trf-is{
+	background-position:-576px 0;
+}
+
+.trf-ie{
+	background-position:-600px 0;
+}
+
+.trf-japan{
+	background-position:-624px 0;
+}
+
+.trf-kr{
+	background-position:-648px 0;
+}
+
+.trf-lv{
+	background-position:-672px 0;
+}
+
+.trf-lt{
+	background-position:-696px 0;
+}
+
+.trf-mk{
+	background-position:-720px 0;
+}
+
+.trf-my{
+	background-position:-744px 0;
+}
+
+.trf-mt{
+	background-position:-768px 0;
+}
+
+.trf-no{
+	background-position:-792px 0;
+}
+
+.trf-ir{
+	background-position:-816px 0;
+}
+
+.trf-polish{
+	background-position:-840px 0;
+}
+
+.trf-pt{
+	background-position:-864px 0;
+}
+
+.trf-ro{
+	background-position:-888px 0;
+}
+
+.trf-russian{
+	background-position:-912px 0;
+}
+
+.trf-rs{
+	background-position:-936px 0;
+}
+
+.trf-sk{
+	background-position:-960px 0;
+}
+
+.trf-sl{
+	background-position:-984px 0;
+}
+
+.trf-spanish{
+	background-position:-1008px 0;
+}
+
+.trf-ke{
+	background-position:-1032px 0;
+}
+
+.trf-se{
+	background-position:-1056px 0;
+}
+
+.trf-ph{
+	background-position:-1080px 0;
+}
+
+.trf-thai{
+	background-position:-1104px 0;
+}
+
+.trf-turkish{
+	background-position:-1128px 0;
+}
+
+.trf-ua{
+	background-position:-1152px 0;
+}
+
+.trf-vn{
+	background-position:-1176px 0;
+}
+
+.trf-wales{
+	background-position:-1200px 0;
+}
+
+.trf-europeanunion{
+	background-position:-1224px 0;
+}
