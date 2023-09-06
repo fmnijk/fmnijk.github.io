@@ -10,6 +10,12 @@ https://transfonter.org/ttc-unpack (unpack from TH-Times.ttc)
     TH-Times_cyrl.ttf
     TH-Times_grek.ttf
     TH-Times_telex.ttf
+https://cloudconvert.com/ttf-to-woff2 (convert from ttf)
+    TH-Times.woff2 
+    TH-Tshyn-P0.woff2 
+    TH-Tshyn-P1.woff2 
+    TH-Tshyn-P2.woff2 
+    TH-Tshyn-P16.woff2
 
 https://cdn.jsdelivr.net/gh/the-emoji-guy/Emoji-Swap@main/fonts/
     BabelStoneFlags.ttf
