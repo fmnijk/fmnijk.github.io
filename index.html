@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片搜尋工具</title>
+    <link href="favicon.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div id="drop-zone">
+            <h1>圖片搜尋工具</h1>
+            <p>將圖片拖曳至此處或點擊上傳，也可以在下方輸入圖片網址</p>
+            <input type="file" id="file-input" accept="image/*">
+            <div id="preview-container" style="display: none;">
+                <img id="image-preview" alt="圖片預覽" style="max-width: 100%; max-height: 200px;">
+            </div>
+        </div>
+        <input type="text" id="image-url" placeholder="貼上圖片URL">
+        <div class="search-buttons">
+            <button id="saucenao">SauceNAO</button>
+            <br>
+            <button id="google-lens-tw">Google Lens (繁體中文)</button>
+            <button id="google-lens-cn">Google Lens (簡體中文)</button>
+            <button id="google-lens-ja">Google Lens (日文)</button>
+            <button id="google-lens-us">Google Lens (英文)</button>
+            <br>
+            <button id="google-image-search-tw">Google 圖片搜尋 (繁體中文)</button>
+            <button id="google-image-search-cn">Google 圖片搜尋 (簡體中文)</button>
+            <button id="google-image-search-ja">Google 圖片搜尋 (日文)</button>
+            <button id="google-image-search-us">Google 圖片搜尋 (英文)</button>
+            <br>
+            <button id="yandex">YANDEX</button>
+            <button id="bing">BING</button>
+            <br>
+            <button id="iqdb">IQDB</button>
+            <button id="iqdb-3d">IQDB 3D</button>
+            <button id="tineye">TINEYE</button>
+            <button id="ascii2d-net">Ascii2D</button>
+            <button id="trace-moe">trace.moe</button>
+            <br>
+            <button id="baidu">百度识图</button>
+            <button id="sogou">搜狗图片</button>
+            <br>
+            <button id="alamy">Alamy</button>
+            <button id="immerse">immerse</button>
+            <button id="lexica">Lexica</button>
+            <br>
+            <button id="karmadecay">Karma Decay</button>
+            <button id="imgops">IMGOPS</button>
+            <br>
+            <button id="taobao" class="blue-button">淘寶搜圖</button>
+            <button id="1688" class="blue-button">1688</button>
+            <button id="360" class="blue-button">360图片</button>
+            <button id="wildberries" class="blue-button">Wildberries</button>
+            <br>
+            <button id="e-hentai" class="blue-button">E-Hentai</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

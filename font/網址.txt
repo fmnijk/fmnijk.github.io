@@ -1,0 +1,31 @@
+
+http://cheonhyeong.com/Traditional/download.html
+    TH-Times.ttc
+    TH-Tshyn-P0.ttf
+    TH-Tshyn-P1.ttf
+    TH-Tshyn-P2.ttf
+    TH-Tshyn-P16.ttf
+https://transfonter.org/ttc-unpack (unpack from TH-Times.ttc)
+    TH-Times.ttf
+    TH-Times_cyrl.ttf
+    TH-Times_grek.ttf
+    TH-Times_telex.ttf
+
+https://cdn.jsdelivr.net/gh/the-emoji-guy/Emoji-Swap@main/fonts/
+    BabelStoneFlags.ttf
+    BabelStoneFlags.woff2
+    Blank.woff2
+    BlobmojiCompat.ttf
+    EmojiTwo.woff2
+    FluentUIEmojiFlat.woff2
+    FluentUIEmojiHighContrast.woff2
+    NotoColorEmoji.ttf
+    NotoColorEmoji.woff2
+    Noto-COLRv1.ttf
+    NotoEmoji-BnW.ttf
+    NotoEmoji-BnW.woff2
+    OpenMoji-Black.woff2
+    OpenMoji-Regular.woff2
+    OpenMoji-v14uniOnly.woff2
+    OpenSansEmoji.woff2
+    TwemojiMozilla-Regular.woff2

@@ -1,0 +1,35 @@
+封存
+https://stackoverflow.com/questions/74136824/google-lens-image-search-on-mobile-by-url
+
+
+------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+TODO:!!!不同解析度搜尋結果不同!!! 例如Bing原始解析度搜尋不到圖片，長寬壓縮成50%就可以了
+TODO:免api圖床
+
+
+
+
+ImgBB API
+https://api.imgbb.com/
+
+
+
+
+其他圖床
+https://postimages.org/
+
+
+
+https://stackoverflow.com/questions/13716658/how-to-delete-all-commit-history-in-github
+
+git filter-branch --force --index-filter "git rm --cached --ignore-unmatch '測試.txt'" --prune-empty --tag-name-filter cat -- --all
+git push origin --force --all
+
+
