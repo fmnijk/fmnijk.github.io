@@ -1,3 +1,14 @@
+/*上方隱藏的按鈕*/
+document.addEventListener('keydown', function(event) {
+    if (event.key.toLowerCase() === 'h') {
+        let buttons = document.getElementsByClassName('hiddenButton');
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].style.display = (buttons[i].style.display === 'inline-flex') ? 'none' : 'inline-flex';
+        }
+    }
+});
+
+/*圖片搜尋工具*/
 document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
