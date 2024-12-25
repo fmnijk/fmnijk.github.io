@@ -8,7 +8,12 @@ from PySide6.QtCore import Qt, QSize, QPoint, QRect
 class InfoLabel(QLabel):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("background-color: rgba(0, 0, 0, 180); color: white; padding: 5px;")
+        self.setStyleSheet("""
+            background-color: rgba(0, 0, 0, 180);
+            color: white;
+            padding: 5px;
+            font-size: 28px;
+        """)
         self.setAlignment(Qt.AlignLeft)
         self.setMinimumHeight(50)
 
@@ -65,7 +70,7 @@ class ImageLabel(QLabel):
         
         old_zoom = self._zoom
         self._zoom *= 1.1 if event.angleDelta().y() > 0 else 0.9
-        self._zoom = max(0.1, min(self._zoom, 10.0))
+        self._zoom = max(0.01, min(self._zoom, 100.0))
         
         if old_zoom != self._zoom:
             self._update_pixmap()
@@ -156,8 +161,8 @@ class PhotoViewer(QMainWindow):
         super().__init__()
         self.setWindowTitle("Photo Viewer")
         self.setStyleSheet("background-color: black;")
+        self.setMinimumSize(200, 200)
         
-        # Setup UI components
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
@@ -170,7 +175,6 @@ class PhotoViewer(QMainWindow):
         layout.addWidget(self.image_label)
         layout.addWidget(self.info_label)
         
-        # Check path and collect images
         path = Path(path).resolve()
         if not path.exists():
             self.image_label.setText(f"Path not found: {path}")
@@ -186,7 +190,6 @@ class PhotoViewer(QMainWindow):
             return
             
         self.current_index = self.images.index(str(path)) if path.is_file() else 0
-        self.showMaximized()
         self.show_image()
     
     def show_image(self):
@@ -220,9 +223,15 @@ class PhotoViewer(QMainWindow):
             self.image_label._view_offset = QPoint(0, 0)
             self.image_label._update_pixmap()
 
+import os
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QApplication
+
 if __name__ == "__main__":
-   if len(sys.argv) != 2:
-       print("""
+    import sys
+    if len(sys.argv) != 2:
+        print("""
 Photo Viewer Usage:
    python script.py <path>
    path: Image file or directory containing images
@@ -241,10 +250,15 @@ Controls:
        
 Supported formats: jpg, jpeg, png, gif
 """)
-       sys.exit(1)
-       
-   app = QApplication(sys.argv)
-   viewer = PhotoViewer(sys.argv[1])
-   viewer.show()
-   sys.exit(app.exec())
+        sys.exit(1)
+    
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
+    os.environ["QT_SCALE_FACTOR"] = "1"
 
+    app = QApplication(sys.argv)
+    app.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+
+    viewer = PhotoViewer(sys.argv[1])
+    viewer.show()
+
+    sys.exit(app.exec())
