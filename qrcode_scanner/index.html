@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code 掃描器</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+        // 移除尾部斜線
+        if (window.location.pathname.endsWith('/')) {
+            const newPath = window.location.pathname.slice(0, -1);
+            window.history.replaceState(null, '', newPath);
+        }
+    </script>
     <style>
         body {
             margin: 0;
@@ -83,7 +90,6 @@
         const canvas = document.getElementById('debug-canvas');
         const ctx = canvas.getContext('2d');
 
-        // 防止瀏覽器預設的拖放行為
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
@@ -94,7 +100,6 @@
             e.stopPropagation();
         }
 
-        // 拖曳效果
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, highlight, false);
         });
@@ -111,7 +116,6 @@
             instructions.classList.remove('drag-over');
         }
 
-        // 處理拖放
         dropZone.addEventListener('drop', handleDrop, false);
 
         function handleDrop(e) {
@@ -127,23 +131,16 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
-                        // 設置 canvas 大小與圖片相同
                         canvas.width = img.width;
                         canvas.height = img.height;
-                        
-                        // 在 canvas 上繪製圖片
                         ctx.drawImage(img, 0, 0);
-                        
-                        // 獲取圖片數據
                         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        
-                        // 使用 jsQR 解碼
                         const code = jsQR(imageData.data, imageData.width, imageData.height);
                         
                         result.style.display = 'block';
                         if (code) {
                             if (isValidUrl(code.data)) {
-                                result.innerHTML = `<a href="${code.data}" target="_blank">${code.data}</a>`;
+                                result.innerHTML = `掃描到的網址：<a href="${code.data}" target="_blank">${code.data}</a>`;
                             } else {
                                 result.textContent = `掃描到的內容：${code.data}`;
                             }
