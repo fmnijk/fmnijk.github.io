@@ -50,7 +50,6 @@
             padding: 15px;
             border-radius: 5px;
             background-color: #333;
-            max-width: 400px;
             word-break: break-all;
         }
 
@@ -140,7 +139,7 @@
                         result.style.display = 'block';
                         if (code) {
                             if (isValidUrl(code.data)) {
-                                result.innerHTML = `掃描到的網址：<a href="${code.data}" target="_blank">${code.data}</a>`;
+                                result.innerHTML = `<a href="${code.data}" target="_blank">${code.data}</a>`;
                             } else {
                                 result.textContent = `掃描到的內容：${code.data}`;
                             }
