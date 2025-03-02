@@ -3,6 +3,7 @@ import argparse
 import natsort
 import winshell
 
+
 def build_parser():
     """Build and configure an ArgumentParser object"""
     parser = argparse.ArgumentParser(
@@ -84,6 +85,40 @@ class onefile:
     dst = None
     tmp = None
     finished = False
+    lnks = []
+
+
+def get_all_shortcuts_map():
+    """獲取檔案與所有捷徑可能存在的映射關係
+    返回格式: {目標檔案路徑: [捷徑路徑1, 捷徑路徑2, ...]}
+    """
+    lnk_directory = "D:\\H\\gallery-dl精選\\0"  # 固定路徑
+    target_to_lnks = {}
+    
+    if not os.path.exists(lnk_directory):
+        print(f"捷徑目錄不存在：{lnk_directory}")
+        return target_to_lnks
+    
+    # 獲取所有lnk檔案
+    lnk_files = []
+    for root, dirs, files in os.walk(lnk_directory):
+        for file in files:
+            if file.endswith('.lnk'):
+                lnk_files.append(os.path.join(root, file))
+    
+    # 讀取每個lnk檔案的目標路徑
+    for lnk_path in lnk_files:
+        try:
+            shortcut = winshell.Shortcut(lnk_path)
+            target_path = shortcut.path
+            
+            if target_path not in target_to_lnks:
+                target_to_lnks[target_path] = []
+            target_to_lnks[target_path].append(lnk_path)
+        except Exception as e:
+            input(f"讀取捷徑 {lnk_path} 時出錯: {str(e)} 請按 Enter 繼續...")
+    
+    return target_to_lnks
 
 
 def prepare(args):
@@ -96,6 +131,9 @@ def prepare(args):
     start = 1
     s = args.s
     files = listimageonly(s)
+    
+    # 獲取所有捷徑
+    shortcuts_map = get_all_shortcuts_map()
     
     #foldr
     if args.r:
@@ -115,6 +153,10 @@ def prepare(args):
         ext = ext.lower()
 
         element.src = join(s, filename)
+        
+        # 檢查是否有捷徑指向這個檔案
+        if element.src in shortcuts_map:
+            element.lnks = shortcuts_map[element.src]
 
         filename_ = filename.rsplit(".", 1)[0].lstrip(" 0123456789")
         if " " + filename_ in filename:
@@ -144,9 +186,39 @@ def prepare(args):
     return files
 
 
+def edit_lnk(lnk_path, new_target_path):
+    """
+    修改捷徑的目標路徑和工作目錄
+    
+    參數:
+        lnk_path: 捷徑的路徑
+        new_target_path: 新的目標路徑
+    """
+    try:
+        shortcut = winshell.Shortcut(lnk_path)
+        
+        # 修改目標路徑
+        shortcut.path = new_target_path
+        
+        # 修改工作目錄為新目標的父目錄
+        from pathlib import Path
+        shortcut.working_directory = str(Path(new_target_path).parent)
+        
+        # 儲存修改
+        shortcut.write()
+        
+        return True
+    except Exception as e:
+        input(f"更新捷徑 {lnk_path} 時出錯: {str(e)} 請按 Enter 繼續...")
+        return False
+
+
 def fold(filelist):
     """fold or unfold file name"""
     before = len(os.listdir())
+    
+    # 追蹤已更新的捷徑數量
+    shortcut_updates = 0
     
     tries = 0
     while filelist:
@@ -173,12 +245,19 @@ def fold(filelist):
                 continue
             else:
                 try:
-                    if f.tmp:
-                        os.rename(f.tmp, f.dst)
-                    else:
-                        os.rename(f.src, f.dst)
+                    # 重命名檔案
+                    old_path = f.tmp if f.tmp else f.src
+                    os.rename(old_path, f.dst)
                     print("src:{} dst:{}".format(f.src, f.dst))
-                except:
+                    
+                    # 更新捷徑
+                    if f.lnks:
+                        for lnk_path in f.lnks:
+                            if edit_lnk(lnk_path, f.dst):
+                                shortcut_updates += 1
+                                print(f"更新捷徑: {lnk_path} -> {f.dst}")
+                except Exception as e:
+                    print(f"重命名檔案時出錯: {str(e)}")
                     continue
                 f.finished = True
         if any(f.finished for f in filelist):
@@ -188,13 +267,20 @@ def fold(filelist):
             tries = 1
     
     after = len(os.listdir())
+    print("運行前", before, "個檔案")
+    print("運行後", after, "個檔案")
     if before != after:
-        print(before, "個項目")
-        print(after, "個項目")
-        response = input("檔案數量改變，可能有問題，請按 Enter 繼續...")
-
+        input("檔案數量改變，可能有問題，請按 Enter 繼續...")
+    else:
+        print("檔案數量沒問題。")
+    # 報告更新的捷徑數量
+    print(f"已更新 {shortcut_updates} 個捷徑，指向重命名後的檔案")
 
 if __name__ == "__main__":
     parser = build_parser()
     args = parser.parse_args()
     fold(prepare(args))
+
+
+# 編譯指令
+# pyinstaller --onefile fold.py
