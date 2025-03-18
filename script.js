@@ -161,17 +161,21 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleImage(file, maxRetries = 3) {
         imageUrl.value = '';
         dimImagePreview();
-        
+
         const formData = new FormData();
         formData.append('image', file);
-        formData.append('key', '091241c47103f1746809646d2d4aef7f');
-        formData.append('expiration', 15552000);
 
         let retries = 0;
         while (retries < maxRetries) {
             try {
-                const response = await fetch('https://api.imgbb.com/1/upload', {
+                const response = await fetch('https://api.imgur.com/3/image', {
                     method: 'POST',
+                    headers: {
+                        // Replace with your Imgur client ID
+                        // https://api.imgur.com/oauth2/addclient
+                        // https://imgur.com/account/settings/apps
+                        'Authorization': 'Client-ID a12f9338f9cd5f8'
+                    },
                     body: formData
                 });
 
@@ -181,10 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const result = await response.json();
 
-                if (result.data && result.data.url) {
-                    imageUrl.value = result.data.url;
-                    showImagePreview(result.data.url);
-                    updateSearchLinks(result.data.url); // 更新所有連結
+                if (result.data && result.data.link) {
+                    imageUrl.value = result.data.link;
+                    showImagePreview(result.data.link);
+                    updateSearchLinks(result.data.link);
                     return;
                 } else {
                     throw new Error('Upload failed: No URL in response');
@@ -192,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error(`Error uploading image (attempt ${retries + 1}):`, error);
                 retries++;
-                
+
                 if (retries === maxRetries) {
                     showToast(`上傳圖片時發生錯誤：${error.message}`);
                 } else {
