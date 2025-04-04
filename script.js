@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
             let baseUrl, searchUrl;
             
             switch(link.id) {
+                case 'saucenao':
+                    baseUrl = `https://saucenao.com/`;
+                    searchUrl = `https://saucenao.com/search.php?db=999&url=${encodeURIComponent(imageUrl)}`;
+                    break;
+                case 'danbooru':
+                    baseUrl = `https://danbooru.donmai.us/`;
+                    searchUrl = `https://danbooru.donmai.us/iqdb_queries?url=${encodeURIComponent(imageUrl)}`;
+                    break;
                 case 'google-lens-tw':
                     baseUrl = `https://www.google.com/?olud=`;
                     searchUrl = `https://lens.google.com/uploadbyurl?safe=off&gl=tw&hl=zh-TW&url=${encodeURIComponent(imageUrl)}`;
@@ -74,10 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'iqdb-3d':
                     baseUrl = `https://3d.iqdb.org/`;
                     searchUrl = `https://3d.iqdb.org/?url=${encodeURIComponent(imageUrl)}`;
-                    break;
-                case 'saucenao':
-                    baseUrl = `https://saucenao.com/`;
-                    searchUrl = `https://saucenao.com/search.php?db=999&url=${encodeURIComponent(imageUrl)}`;
                     break;
                 case 'ascii2d-net':
                     baseUrl = `https://ascii2d.net/`;
