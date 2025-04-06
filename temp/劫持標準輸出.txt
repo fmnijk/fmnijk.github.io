@@ -1,0 +1,28 @@
+#include <windows.h>
+#include <iostream>int main() {
+SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES) };
+sa.bInheritHandle = TRUE;
+HANDLE hRead, hWrite;
+CreatePipe(&hRead, &hWrite, &sa, 0);
+SetHandleInformation(hRead, HANDLE_FLAG_INHERIT, 0);
+STARTUPINFOW si = { sizeof(si) };
+PROCESS_INFORMATION pi;
+si.dwFlags |= STARTF_USESTDHANDLES;
+si.hStdOutput = hWrite;
+si.hStdError = hWrite;
+si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+CreateProcessW(
+L"E:\\QQ\\QQ.exe",
+NULL, NULL, NULL, TRUE,
+CREATE_NO_WINDOW,
+NULL, NULL,
+&si, &pi);
+CloseHandle(hWrite);
+char buffer【4096】;
+DWORD read;
+while (ReadFile(hRead, buffer, sizeof(buffer) - 1, &read, NULL)) {
+buffer【read】 = '\0';
+std::cout << buffer;
+}
+return 0;
+}
