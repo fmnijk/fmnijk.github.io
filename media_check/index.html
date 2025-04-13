@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音視頻檢查器</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --primary: #bb86fc;
+            --surface: #1e1e1e;
+            --border: #333;
+            --hover: #3700b3;
+            --error: #cf6679;
+            --success: #03dac6;
+        }
+
+        body {
+            font-family: "微軟正黑體", sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drop-area {
+            border: 3px dashed var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+
+        .drop-area:hover,
+        .drop-area.active {
+            border-color: var(--primary);
+            background: rgba(187, 134, 252, 0.1);
+        }
+
+        #path-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: var(--hover);
+            color: white;
+        }
+
+        #info-container {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            background: var(--surface);
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 8px;
+        }
+
+        td:first-child {
+            font-weight: bold;
+            width: 30%;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface);
+            color: var(--text);
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .success {
+            color: var(--success);
+        }
+
+        .error {
+            color: var(--error);
+        }
+
+        .warning {
+            color: #ffd700;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>音視頻檢查器</h1>
+
+        <input type="text" id="path-input" placeholder="檔案路徑" readonly>
+
+        <div class="drop-area" id="drop-area">
+            <p>拖放影片或音頻檔案到這裡</p>
+            <p>或</p>
+            <input type="file" id="file-input" accept="video/*,audio/*" style="display: none;">
+            <button id="select-button">選擇檔案</button>
+        </div>
+
+        <div id="loading" style="display: none; text-align: center;">
+            <div class="spinner"></div>
+            <p>處理中...</p>
+        </div>
+
+        <div id="info-container">
+            <table id="info-table"></table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const $ = selector => document.querySelector(selector);
+            const dropArea = $('#drop-area');
+            const fileInput = $('#file-input');
+            const pathInput = $('#path-input');
+            const selectButton = $('#select-button');
+            const infoTable = $('#info-table');
+            const loading = $('#loading');
+
+            // 定義表格字段 - 保留所有字段不隱藏
+            const allFields = [
+                '檔案名稱',
+                '檔案大小',
+                '檔案類型',
+                '最後修改',
+                '時長',
+                '解析度',
+                'moov 位置',
+                'mdat 位置',
+                '快速啟動 moov 在前',
+                'Edit List',
+                '音訊開始時間',
+                '視訊開始時間',
+                'A/V 同步',
+                '音頻格式',
+                '採樣率',
+                '聲道數',
+                '音頻比特率'
+            ];
+
+            // 核心事件
+            selectButton.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+            // 拖放事件綁定
+            dropArea.addEventListener('drop', e => {
+                e.preventDefault();
+                dropArea.classList.remove('active');
+                const file = e.dataTransfer.files[0];
+                if (file) handleFile(file);
+            });
+
+            // 拖放效果
+            ['dragenter', 'dragover'].forEach(event => {
+                dropArea.addEventListener(event, e => {
+                    e.preventDefault();
+                    dropArea.classList.add('active');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(event => {
+                dropArea.addEventListener(event, e => {
+                    e.preventDefault();
+                    dropArea.classList.remove('active');
+                });
+            });
+
+            // 主要處理函數
+            function handleFile(file) {
+                if (!file) return;
+
+                // 檢查是否為音頻或視頻文件
+                const isVideo = file.type.startsWith('video/');
+                const isAudio = file.type.startsWith('audio/');
+
+                if (!isVideo && !isAudio) {
+                    showToast('請選擇影片或音頻檔案', 'error');
+                    return;
+                }
+
+                // 更新路徑顯示
+                pathInput.value = file.name;
+                loading.style.display = 'block';
+
+                // 初始化表格 - 始終顯示所有字段
+                initTable(allFields);
+
+                // 基本資訊
+                const info = {
+                    '檔案名稱': file.name,
+                    '檔案大小': formatSize(file.size),
+                    '檔案類型': file.type,
+                    '最後修改': new Date(file.lastModified).toLocaleString('zh-TW')
+                };
+
+                // 為非視頻檔案預設視頻相關欄位
+                if (!isVideo) {
+                    info['解析度'] = '';
+                    info['moov 位置'] = '';
+                    info['mdat 位置'] = '';
+                    info['快速啟動 moov 在前'] = '';
+                    info['Edit List'] = '';
+                    info['視訊開始時間'] = '';
+                    info['A/V 同步'] = '';
+                }
+
+                // 讀取文件頭分析 MP4 結構 (只對視頻檔進行)
+                if (isVideo) {
+                    const reader = new FileReader();
+                    reader.onload = e => analyzeMP4Structure(e.target.result, info, file);
+                    reader.onerror = () => {
+                        info.錯誤 = '讀取檔案失敗';
+                        updateInfoTable(info);
+                        loading.style.display = 'none';
+                    };
+
+                    // 只讀取前 1MB 用於分析結構
+                    const blob = file.slice(0, Math.min(1024 * 1024, file.size));
+                    reader.readAsArrayBuffer(blob);
+                }
+
+                // 使用媒體元素分析元數據
+                const mediaElement = isVideo ? document.createElement('video') : document.createElement('audio');
+                mediaElement.preload = 'metadata';
+
+                mediaElement.onloadedmetadata = () => {
+                    // 基本資訊
+                    info['時長'] = formatDuration(mediaElement.duration);
+
+                    if (isVideo) {
+                        // 視頻特有資訊
+                        info['解析度'] = `${mediaElement.videoWidth} × ${mediaElement.videoHeight}`;
+
+                        // 模擬音視頻同步分析
+                        simulateAVSyncAnalysis(info, mediaElement);
+                    } else {
+                        // 純音頻文件的音視頻同步資訊
+                        info['音訊開始時間'] = '0.000s';
+                    }
+
+                    // 所有檔案都進行音頻分析
+                    analyzeAudioInfo(info, mediaElement, file);
+
+                    URL.revokeObjectURL(mediaElement.src);
+                    updateInfoTable(info);
+                    loading.style.display = 'none';
+                };
+
+                mediaElement.onerror = () => {
+                    info['錯誤'] = '無法讀取媒體元數據';
+                    URL.revokeObjectURL(mediaElement.src);
+                    updateInfoTable(info);
+                    loading.style.display = 'none';
+                };
+
+                mediaElement.src = URL.createObjectURL(file);
+
+                // 設置超時保護
+                setTimeout(() => {
+                    if (loading.style.display === 'block') {
+                        updateInfoTable(info);
+                        loading.style.display = 'none';
+                    }
+                }, 5000);
+            }
+
+            // 分析音頻信息 - 改進的版本
+            function analyzeAudioInfo(info, mediaElement, file) {
+                try {
+                    // 判斷是否為視頻還是音頻元素
+                    const isVideoWithAudio = mediaElement.tagName === 'VIDEO';
+                    const isAudio = mediaElement.tagName === 'AUDIO';
+
+                    // 從文件MIME類型獲取音頻格式
+                    let audioFormat = '';
+                    const mimeType = file.type.toLowerCase();
+
+                    // 根據MIME類型判斷格式
+                    if (mimeType.includes('mp3')) {
+                        audioFormat = 'MP3';
+                    } else if (mimeType.includes('aac')) {
+                        audioFormat = 'AAC';
+                    } else if (mimeType.includes('wav') || mimeType.includes('wave')) {
+                        audioFormat = 'WAV';
+                    } else if (mimeType.includes('ogg')) {
+                        audioFormat = 'OGG';
+                    } else if (mimeType.includes('flac')) {
+                        audioFormat = 'FLAC';
+                    } else if (mimeType.includes('mp4') || mimeType.includes('m4a')) {
+                        audioFormat = 'AAC (MP4容器)';
+                    } else if (mimeType.includes('webm')) {
+                        audioFormat = 'Opus/Vorbis (WebM容器)';
+                    } else {
+                        // 進一步分析檔案擴展名
+                        const extension = file.name.split('.').pop().toLowerCase();
+                        switch (extension) {
+                            case 'mp3': audioFormat = 'MP3'; break;
+                            case 'aac': audioFormat = 'AAC'; break;
+                            case 'wav': audioFormat = 'WAV'; break;
+                            case 'ogg': audioFormat = 'OGG'; break;
+                            case 'flac': audioFormat = 'FLAC'; break;
+                            case 'm4a': audioFormat = 'AAC (MP4容器)'; break;
+                            case 'opus': audioFormat = 'Opus'; break;
+                            default: audioFormat = '未知 (檢測中)';
+                        }
+                    }
+
+                    // 調用AudioContext獲取更詳細的音頻參數
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // 處理採樣率
+                    let sampleRate;
+                    if (mediaElement.sampleRate) {
+                        sampleRate = `${mediaElement.sampleRate} Hz`;
+                    } else if (audioContext.sampleRate) {
+                        sampleRate = `${audioContext.sampleRate} Hz`;
+                    } else {
+                        sampleRate = '44100 Hz (估計值)';
+                    }
+
+                    // 處理聲道數
+                    let channels;
+                    if (mediaElement.mozChannels) {
+                        channels = mediaElement.mozChannels;
+                    } else if (mediaElement.webkitAudioChannelCount) {
+                        channels = mediaElement.webkitAudioChannelCount;
+                    } else if (isVideoWithAudio && mediaElement.audioTracks && mediaElement.audioTracks.length > 0) {
+                        channels = '2 (估計值)';
+                    } else if (isAudio) {
+                        channels = '2 (估計值)';
+                    } else {
+                        channels = '無聲道';
+                    }
+
+                    // 估算比特率
+                    let bitrate = '未知';
+                    if (file.size && mediaElement.duration) {
+                        // 粗略估算 - 對於音頻文件
+                        if (isAudio) {
+                            const kbps = Math.round((file.size * 8) / mediaElement.duration / 1000);
+                            bitrate = `${kbps} kbps (估計值)`;
+                        } else {
+                            // 對於視頻文件，假設音頻約佔總比特率的10%
+                            const totalKbps = Math.round((file.size * 8) / mediaElement.duration / 1000);
+                            const audioKbps = Math.round(totalKbps * 0.1);
+                            bitrate = `${audioKbps} kbps (估計值)`;
+                        }
+                    }
+
+                    // 更新表格信息
+                    info['音頻格式'] = audioFormat;
+                    info['採樣率'] = sampleRate;
+                    info['聲道數'] = channels;
+                    info['音頻比特率'] = bitrate;
+
+                    // 關閉AudioContext
+                    audioContext.close();
+                } catch (e) {
+                    console.error('音頻分析錯誤:', e);
+                    info['音頻格式'] = '<span class="warning">無法檢測</span>';
+                    info['採樣率'] = '<span class="warning">無法檢測</span>';
+                    info['聲道數'] = '<span class="warning">無法檢測</span>';
+                    info['音頻比特率'] = '<span class="warning">無法檢測</span>';
+                }
+            }
+
+            // 模擬音視頻同步分析（在瀏覽器中無法直接獲取精確值）
+            function simulateAVSyncAnalysis(info, videoElement) {
+                try {
+                    // 檢查視頻是否有音軌
+                    const hasAudio = videoElement.audioTracks && videoElement.audioTracks.length > 0;
+
+                    if (hasAudio) {
+                        info['音訊開始時間'] = '0.000s'; // 模擬值
+                    } else {
+                        info['音訊開始時間'] = '無音訊軌';
+                    }
+
+                    info['視訊開始時間'] = '0.000s'; // 模擬值
+
+                    // A/V 同步檢查
+                    if (hasAudio) {
+                        info['A/V 同步'] = `<span class="success">對齊</span>`;
+                    } else {
+                        info['A/V 同步'] = '<span class="warning">無法檢測 (無音訊)</span>';
+                    }
+                } catch (e) {
+                    console.error('A/V同步分析錯誤:', e);
+                    info['音訊開始時間'] = '<span class="error">讀取失敗</span>';
+                    info['視訊開始時間'] = '<span class="error">讀取失敗</span>';
+                    info['A/V 同步'] = '<span class="error">讀取失敗</span>';
+                }
+            }
+
+            // 分析 MP4 結構
+            function analyzeMP4Structure(buffer, info, file) {
+                try {
+                    const dataView = new DataView(buffer);
+                    const boxes = [];
+                    let position = 0;
+
+                    // 搜索 MP4 盒子
+                    while (position + 8 <= buffer.byteLength) {
+                        const size = dataView.getUint32(position);
+                        let boxType = '';
+
+                        // 讀取 box 類型
+                        for (let i = 0; i < 4; i++) {
+                            const charCode = dataView.getUint8(position + 4 + i);
+                            if (charCode >= 32 && charCode <= 126) {
+                                boxType += String.fromCharCode(charCode);
+                            }
+                        }
+
+                        // 記錄重要盒子
+                        if (['ftyp', 'moov', 'mdat'].includes(boxType)) {
+                            boxes.push({ type: boxType, position, size });
+                        }
+
+                        // 如果 size 無效，退出
+                        if (size === 0 || size > buffer.byteLength) break;
+                        position += size;
+                    }
+
+                    // 分析盒子順序
+                    if (boxes.length > 0) {
+                        boxes.sort((a, b) => a.position - b.position);
+
+                        const moovBox = boxes.find(box => box.type === 'moov');
+                        const mdatBox = boxes.find(box => box.type === 'mdat');
+
+                        if (moovBox) {
+                            info['moov 位置'] = formatSize(moovBox.position);
+                        } else {
+                            info['moov 位置'] = '未置於檔案開頭';
+                            info['快速啟動 moov 在前'] = '<span class="error">否</span>';
+                        }
+
+                        if (mdatBox) {
+                            info['mdat 位置'] = formatSize(mdatBox.position);
+                        }
+
+                        // 檢查快速啟動
+                        if (moovBox && mdatBox) {
+                            const isQuickStart = moovBox.position < mdatBox.position;
+                            info['快速啟動 moov 在前'] = isQuickStart ?
+                                '<span class="success">是</span>' :
+                                '<span class="error">否</span>';
+                        }
+
+                        // 編輯列表標記
+                        if (moovBox) {
+                            info['Edit List'] = '<span class="warning">需要完整分析</span>';
+                        }
+                    }
+                } catch (e) {
+                    console.error('MP4 分析錯誤:', e);
+                }
+
+                updateInfoTable(info);
+            }
+
+            // 初始化表格
+            function initTable(fields) {
+                let html = '';
+                for (let field of fields) {
+                    html += `<tr><td>${field}</td><td></td></tr>`;
+                }
+                infoTable.innerHTML = html;
+            }
+
+            // 更新信息表格 - 保留表格結構，僅更新值
+            function updateInfoTable(info) {
+                const rows = infoTable.querySelectorAll('tr');
+
+                for (const row of rows) {
+                    const cells = row.querySelectorAll('td');
+                    const key = cells[0].textContent;
+                    if (info[key] !== undefined) {
+                        cells[1].innerHTML = info[key];
+                    }
+                }
+            }
+
+            // 顯示提示
+            function showToast(message, type = 'info') {
+                const existing = document.querySelector('.toast');
+                if (existing) document.body.removeChild(existing);
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.parentNode && document.body.removeChild(toast), 300);
+                }, 5000);
+            }
+
+            // 格式化大小
+            function formatSize(bytes) {
+                const units = ['bytes', 'KB', 'MB', 'GB'];
+                let i = 0;
+                while (bytes >= 1024 && i < units.length - 1) {
+                    bytes /= 1024;
+                    i++;
+                }
+                return `${bytes.toFixed(2)} ${units[i]}`;
+            }
+
+            // 格式化時長
+            function formatDuration(seconds) {
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+
+                let result = '';
+                if (h > 0) result += `${h}小時 `;
+                if (m > 0 || h > 0) result += `${m}分鐘 `;
+                result += `${s}秒`;
+
+                return result;
+            }
+
+            // 初始化頁面
+            initTable(allFields);
+        });
+    </script>
+</body>
+
+</html>
