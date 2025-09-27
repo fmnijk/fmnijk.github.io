@@ -1,5 +1,5 @@
 /*上方隱藏的按鈕*/
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key.toLowerCase() === 'h') {
         let buttons = document.getElementsByClassName('hiddenButton');
         for (let i = 0; i < buttons.length; i++) {
@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSearchLinks(imageUrl) {
         searchLinks.forEach(link => {
             let baseUrl, searchUrl;
-            
-            switch(link.id) {
+
+            switch (link.id) {
                 case 'saucenao':
                     baseUrl = `https://saucenao.com/`;
                     searchUrl = `https://saucenao.com/search.php?db=999&url=${encodeURIComponent(imageUrl)}`;
@@ -43,6 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     baseUrl = `https://www.google.com/?olud=`;
                     searchUrl = `https://lens.google.com/uploadbyurl?safe=off&gl=ja&hl=ja&url=${encodeURIComponent(imageUrl)}`;
                     break;
+                case 'google-lens-ko':
+                    baseUrl = `https://www.google.com/?olud=`;
+                    searchUrl = `https://lens.google.com/uploadbyurl?safe=off&gl=kr&hl=ko&url=${encodeURIComponent(imageUrl)}`;
+                    break;
                 case 'google-lens-us':
                     baseUrl = `https://www.google.com/?olud=`;
                     searchUrl = `https://lens.google.com/uploadbyurl?safe=off&gl=us&hl=en-US&url=${encodeURIComponent(imageUrl)}`;
@@ -58,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'google-image-search-ja':
                     baseUrl = `https://images.google.com/`;
                     searchUrl = `https://www.google.com/searchbyimage?safe=off&gl=ja&hl=ja&sbisrc=google&image_url=${encodeURIComponent(imageUrl)}`;
+                    break;
+                case 'google-image-search-ko':
+                    baseUrl = `https://images.google.com/`;
+                    searchUrl = `https://www.google.com/searchbyimage?safe=off&gl=kr&hl=ko&sbisrc=google&image_url=${encodeURIComponent(imageUrl)}`;
                     break;
                 case 'google-image-search-us':
                     baseUrl = `https://images.google.com/`;
@@ -143,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 default:
                     searchUrl = baseUrl = '';
             }
-            
+
             link.href = imageUrl ? searchUrl : baseUrl;
         });
     }
@@ -209,9 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
+
     dropZone.addEventListener('click', () => fileInput.click());
-    
+
     document.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
