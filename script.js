@@ -171,11 +171,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 上傳圖片後更新連結
     async function handleImage(file, maxRetries = 3) {
-        imageUrl.value = '';
+        imageUrl.value = '壓縮並上傳中...';
+        // 預覽原始圖片並調暗
+        showImagePreview(URL.createObjectURL(file));
         dimImagePreview();
 
+        // --- 壓縮圖片的程式碼開始 ---
+        console.log(`原始圖片大小: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+
+        const options = {
+            maxSizeMB: 1,           // 控制輸出檔案的最大體積 (單位 MB)
+            maxWidthOrHeight: 1920, // 控制輸出圖片的最長邊像素
+            useWebWorker: true,     // 使用 Web Worker，避免 UI 卡頓
+            fileType: 'image/jpeg', // 強制輸出為 JPG 格式
+            initialQuality: 1.0     // 初始壓縮品質
+        }
+
+        let compressedFile;
+        try {
+            // 呼叫函式庫進行壓縮
+            compressedFile = await imageCompression(file, options);
+            console.log(`壓縮後圖片大小: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+        } catch (error) {
+            console.error('圖片壓縮失敗:', error);
+            showToast(`圖片壓縮失敗: ${error.message}`);
+            imageUrl.value = '壓縮失敗，請重試';
+            // 恢復預覽圖亮度
+            imagePreview.style.opacity = 1.0;
+            return;
+        }
+        // --- 壓縮圖片的程式碼結束 ---
+
+        // 使用壓縮後的圖片 (compressedFile) 進行上傳
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', compressedFile);
 
         let retries = 0;
         while (retries < maxRetries) {
@@ -183,9 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('https://api.imgur.com/3/image', {
                     method: 'POST',
                     headers: {
-                        // Replace with your Imgur client ID
-                        // https://api.imgur.com/oauth2/addclient
-                        // https://imgur.com/account/settings/apps
                         'Authorization': 'Client-ID a12f9338f9cd5f8'
                     },
                     body: formData
@@ -199,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (result.data && result.data.link) {
                     imageUrl.value = result.data.link;
+                    // 使用 Imgur 返回的 URL 更新預覽圖並恢復亮度
                     showImagePreview(result.data.link);
                     updateSearchLinks(result.data.link);
                     return;
@@ -211,6 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (retries === maxRetries) {
                     showToast(`上傳圖片時發生錯誤：${error.message}`);
+                    imageUrl.value = '上傳失敗，請重試';
+                    // 恢復預覽圖亮度
+                    imagePreview.style.opacity = 1.0;
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
