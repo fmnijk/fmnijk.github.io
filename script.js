@@ -205,15 +205,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // 使用壓縮後的圖片 (compressedFile) 進行上傳
         const formData = new FormData();
         formData.append('image', compressedFile);
+        formData.append('key', '091241c47103f1746809646d2d4aef7f');
+        formData.append('expiration', 15552000); // 180 days in seconds
 
         let retries = 0;
         while (retries < maxRetries) {
             try {
-                const response = await fetch('https://api.imgur.com/3/image', {
+                const response = await fetch('https://api.imgbb.com/1/upload', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Client-ID a12f9338f9cd5f8'
-                    },
                     body: formData
                 });
 
@@ -223,11 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const result = await response.json();
 
-                if (result.data && result.data.link) {
-                    imageUrl.value = result.data.link;
-                    // 使用 Imgur 返回的 URL 更新預覽圖並恢復亮度
-                    showImagePreview(result.data.link);
-                    updateSearchLinks(result.data.link);
+                if (result.data && result.data.url) {
+                    imageUrl.value = result.data.url;
+                    // 使用 imgbb 返回的 URL 更新預覽圖並恢復亮度
+                    showImagePreview(result.data.url);
+                    updateSearchLinks(result.data.url);
                     return;
                 } else {
                     throw new Error('Upload failed: No URL in response');
